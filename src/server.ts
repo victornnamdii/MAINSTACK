@@ -31,3 +31,5 @@ app.use("/api/v1/products", productRouter);
 
 app.use(pageNotFoundHandler);
 app.use(errorRequestHandler);
+
+export default app;

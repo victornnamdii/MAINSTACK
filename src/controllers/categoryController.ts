@@ -84,7 +84,7 @@ class CategoryController {
         }
       }
 
-      res.status(201).json({ data: category });
+      res.status(200).json({ data: category });
     } catch (error) {
       next(error);
     }
