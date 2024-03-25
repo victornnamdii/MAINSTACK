@@ -16,7 +16,7 @@ class BrandController {
 
       res.status(201).json({
         message: `${name} brand successfully added`,
-        brand,
+        data: brand,
       });
     } catch (error) {
       next(error);
@@ -113,7 +113,7 @@ class BrandController {
         }
       }
 
-      res.status(201).json({ data: brand });
+      res.status(200).json({ data: brand });
     } catch (error) {
       next(error);
     }

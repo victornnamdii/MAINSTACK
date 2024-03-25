@@ -12,9 +12,11 @@ chai.use(chaiHttp);
 const email = "abcdefghijklmnopqrstuvwxyz@gmail.com";
 const email2 = "asdfghj@gmail.com";
 const categoryName = "Asdfghjuytfvbnm";
+const brandName = "AWERTGDSA";
 
 let token: string;
 let categoryId: string;
+let brandId: string;
 
 describe("API Tests", function () {
   beforeEach(() => {});
@@ -199,6 +201,97 @@ describe("API Tests", function () {
         const res3 = await chai
           .request(app)
           .delete(`/api/v1/categories/${categoryId}`)
+          .set("Authorization", `Bearer ${token}`);
+
+        expect(res3).to.have.status(200);
+      });
+    });
+  });
+
+  describe("Brand Tests", () => {
+    describe("Add brand", () => {
+      it("should add brand", async () => {
+        const res = await chai
+          .request(app)
+          .post("/api/v1/brands")
+          .send({ name: brandName })
+          .set("Authorization", `Bearer ${token}`);
+
+        expect(res).to.have.status(201);
+        expect(res.body.data.name).to.equal(brandName);
+
+        brandId = res.body.data._id;
+      });
+    });
+
+    describe("Update", () => {
+      it("should update brand", async () => {
+        const res = await chai
+          .request(app)
+          .put(`/api/v1/brands/${brandId}`)
+          .send({ name: brandName })
+          .set("Authorization", `Bearer ${token}`);
+
+        expect(res).to.have.status(201);
+        expect(res.body.data.name).to.exist;
+      });
+    });
+
+    describe("Get brands", () => {
+      it("should get brands", async () => {
+        const res = await chai
+          .request(app)
+          .get("/api/v1/brands")
+          .set("Authorization", `Bearer ${token}`);
+
+        expect(res).to.have.status(200);
+        expect(res.body.data).to.be.an("array");
+        expect(res.body.metadata).to.be.an("object");
+      });
+    });
+
+    describe("Get brand", () => {
+      it("should get a brand", async () => {
+        const res = await chai
+          .request(app)
+          .get(`/api/v1/brands/${brandId}`)
+          .set("Authorization", `Bearer ${token}`);
+
+        expect(res).to.have.status(200);
+        expect(res.body.data).to.be.an("object");
+      });
+
+      it("should get a brand and include 5 of it's products", async () => {
+        const res = await chai
+          .request(app)
+          .get(`/api/v1/brands/${brandId}?include=products`)
+          .set("Authorization", `Bearer ${token}`);
+
+        expect(res).to.have.status(200);
+        expect(res.body.data).to.be.an("object");
+        expect(res.body.data.brand_products).to.be.an("array");
+        expect(res.body.data.brand_products.length <= 5).to.equal(true);
+      });
+    });
+
+    describe("Get Brand's Products", () => {
+      it("should get a brand's product", async () => {
+        const res = await chai
+          .request(app)
+          .get(`/api/v1/brands/${brandId}/products`)
+          .set("Authorization", `Bearer ${token}`);
+
+        expect(res).to.have.status(200);
+        expect(res.body.metadata).to.be.an("object");
+        expect(res.body.data).to.be.an("array");
+      });
+    });
+
+    describe("Delete Brand", () => {
+      it("should delete brand", async () => {
+        const res3 = await chai
+          .request(app)
+          .delete(`/api/v1/brands/${brandId}`)
           .set("Authorization", `Bearer ${token}`);
 
         expect(res3).to.have.status(200);
