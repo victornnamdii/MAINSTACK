@@ -22,7 +22,7 @@ const errorHandler: ErrorHandlingMiddlewareFunction = (error: MongoError, doc, n
       new APIError(
         "Unique Parameter",
         HttpStatusCode.BAD_REQUEST,
-        `${error.keyValue.name} already exists`,
+        `${Object.keys(error.keyValue)[0]} already exists`,
         true
       )
     );

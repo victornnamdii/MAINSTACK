@@ -96,9 +96,7 @@ productSchema.pre("save", function (next) {
 });
 
 productSchema.pre("findOneAndUpdate", function () {
-  const update = this.getUpdate() as {
-    name: string | undefined;
-  };
+  const update = this.getUpdate() as IProduct;
 
   if (update?.name) {
     const words = update.name.trim().split(" ");
@@ -110,6 +108,10 @@ productSchema.pre("findOneAndUpdate", function () {
       }
     });
     update.name = formattedName;
+  }
+
+  if (update?.variants) {
+    variantValidator(update.variants);
   }
 });
 

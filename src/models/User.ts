@@ -13,7 +13,7 @@ interface IUser {
   email: string;
   password: string;
   firstName: string;
-  lastname: string;
+  lastName: string;
 }
 
 interface UserModel extends mongoose.Model<IUser> {
@@ -57,16 +57,47 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.pre("findOneAndUpdate", async function () {
-  const update = this.getUpdate() as {
-    password: string | undefined;
-  };
+  const update = this.getUpdate() as IUser;
   if (update?.password) {
     const salt = await bcrypt.genSalt(10);
     update.password = await bcrypt.hash(update.password.toString(), salt);
   }
+  if (update?.email) {
+    if (!isEmail(update.email)) {
+      throw new APIError(
+        "Invalid Email",
+        HttpStatusCode.BAD_REQUEST,
+        "Please enter a valid email",
+        true
+      );
+    }
+  }
+  if (update?.firstName) {
+    if (!isAlpha(update.firstName)) {
+      throw new APIError(
+        "Invalid Name",
+        HttpStatusCode.BAD_REQUEST,
+        "First name should only contain alphabetic characters",
+        true
+      );
+    }
+  }
+  if (update?.lastName) {
+    if (!isAlpha(update.lastName)) {
+      throw new APIError(
+        "Invalid Name",
+        HttpStatusCode.BAD_REQUEST,
+        "Last name should only contain alphabetic characters",
+        true
+      );
+    }
+  }
 });
 
 userSchema.post("save", errorHandler);
+userSchema.post("updateOne", errorHandler);
+userSchema.post("findOneAndDelete", errorHandler);
+userSchema.post("findOneAndUpdate", errorHandler);
 
 userSchema.static("login", async function (email, password) {
   if (!email || !password) {

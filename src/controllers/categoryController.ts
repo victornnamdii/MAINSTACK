@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import Category from "../models/Category";
-import { IProduct } from "../models/Product";
+import { IProduct, Product } from "../models/Product";
 import pipelineBuilder from "../lib/productPipelineBuilder";
 import { HydratedDocument } from "mongoose";
+import { dbConnection } from "../config/db";
 
 const PAGE_SIZE = 20;
 
@@ -247,16 +248,38 @@ class CategoryController {
   static async deleteCategory(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      const { include } = req.query;
 
-      const category = await Category.findByIdAndDelete(id);
+      let session;
+      try {
+        session = await dbConnection.startSession();
+        session.startTransaction();
 
-      if (category === null) {
-        return next();
+        const category = await Category.findByIdAndDelete(id);
+        if (category === null) {
+          await session.commitTransaction();
+          await session.endSession();
+          return next();
+        }
+
+        if (include === "products") {
+          await Product.deleteMany({ categoryId: id });
+        } else {
+          await Product.updateMany({ categoryId: id }, { categoryId: null });
+        }
+
+        res
+          .status(200)
+          .json({ message: `${category.name} category successfully deleted` });
+        
+        await session.commitTransaction();
+        await session.endSession();
+      } catch (error) {
+        if (session) {
+          await session.abortTransaction();
+        }
+        next(error);
       }
-
-      res
-        .status(200)
-        .json({ message: `${category.name} category successfully deleted` });
     } catch (error) {
       next(error);
     }
