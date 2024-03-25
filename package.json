@@ -2,7 +2,7 @@
   "name": "mainstack",
   "version": "1.0.0",
   "description": "",
-  "main": "build/server.js",
+  "main": "build/src/server.js",
   "scripts": {
     "prebuild": "eslint --fix . --ext .ts",
     "build": "tsc",
