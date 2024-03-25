@@ -35,7 +35,7 @@ class ProductController {
         return next();
       }
 
-      res.status(201).json({ data: product });
+      res.status(20).json({ data: product });
     } catch (error) {
       next(error);
     }
@@ -57,7 +57,7 @@ class ProductController {
         return next();
       }
 
-      res.status(201).json({ data: product });
+      res.status(200).json({ data: product });
     } catch (error) {
       next(error);
     }
@@ -188,7 +188,7 @@ class ProductController {
       }
 
       res
-        .status(201)
+        .status(200)
         .json({ message: `${product?.name} successfully deleted` });
     } catch (error) {
       next(error);
@@ -212,7 +212,7 @@ class ProductController {
         return next();
       }
 
-      res.status(201).json({
+      res.status(200).json({
         message: "Product successfully deleted",
         data: product,
       });
