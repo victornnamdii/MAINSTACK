@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { APIError } from "../lib/error";
-import { isEmail } from "validator";
+import { isEmail, isAlpha } from "validator";
 import HttpStatusCode from "../enum/httpStatusCode";
 import env from "../config/env";
 import errorHandler from "../lib/errorHandler";
@@ -37,10 +37,12 @@ const userSchema = new mongoose.Schema(
     firstName: {
       type: String,
       required: [true, "Please enter your first name"],
+      validate: [isAlpha, "First name should only contain alphabetic characters"],
     },
     lastName: {
       type: String,
       required: [true, "Please enter your last name"],
+      validate: [isAlpha, "Last name should only contain alphabetic characters"],
     },
   },
   {
@@ -52,6 +54,16 @@ userSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
+});
+
+userSchema.pre("findOneAndUpdate", async function () {
+  const update = this.getUpdate() as {
+    password: string | undefined;
+  };
+  if (update?.password) {
+    const salt = await bcrypt.genSalt(10);
+    update.password = await bcrypt.hash(update.password.toString(), salt);
+  }
 });
 
 userSchema.post("save", errorHandler);

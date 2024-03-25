@@ -5,20 +5,27 @@ import jwt, {
   TokenExpiredError,
 } from "jsonwebtoken";
 import env from "../config/env";
+import User from "../models/User";
 
 const { SECRET_KEY } = env;
 
-const verifyToken: RequestHandler = (req, res, next) => {
+const verifyToken: RequestHandler = async (req, res, next) => {
   try {
     const authorization = req.header("Authorization");
     if (!authorization || !authorization.startsWith("Bearer ")) {
       return res.status(401).json({ error: "Access denied" });
     }
 
-    const user = jwt.verify(authorization.slice(7), SECRET_KEY) as {
+    const decoded = jwt.verify(authorization.slice(7), SECRET_KEY) as {
       id: string;
     };
-    req.user = user;
+
+    const user = await User.findById(decoded.id);
+    if (user === null) {
+      return res.status(401).json({ error: "Access denied" });
+    }
+
+    req.user = { id: user.id };
 
     next();
   } catch (error) {
